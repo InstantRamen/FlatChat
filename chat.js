@@ -1,5 +1,4 @@
 const fs = require('fs');
-// const _ = require('lodash');
 
 let chatlog = './logs/chat.json';
 let logTemplate = './base-log.json';
