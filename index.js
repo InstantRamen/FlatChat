@@ -1,37 +1,46 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const fs = require('fs');
+const _ = require('lodash');
+
+const chat = require('./chat');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const chatlog = './logs/chat.json';
 
-app.get('/', (req, res) => {
-  loadLog(chatlog, (data) => {
-    res.send(data);
+chat.init(chatlog);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/:room?', (req, res) => {
+  chat.load((err, data) => {
+    if (err) {
+      res.status(400).send({error: "idk something happened"});
+    }
+    let room = req.params.room || data.root;
+    res.send(data.rooms[room]);
   });
 });
 
-app.get('/rooms/:room', (req, res) => {
-  
+
+app.post('/:room/new', (req, res) => {
+  chat.post({
+    room: req.params.room, 
+    username: req.body.username,
+    message: req.body.message
+  }, err => {
+    if (err) {
+      return res.send('ERROR:' + err);
+    }
+    
+    res.send(req.body);
+    
+    
+  });
 });
 
 app.listen(PORT, () => {
   console.log('listening on port', PORT);
 });
-
-const loadLog = (logfile = chatlog, callback) => {
-  fs.readFile(chatlog, (err, data) => {
-    if (err) {
-      throw new Error(err);
-    }
-    callback(JSON.parse(data));
-  })
-}
-
-const postMessage = (user, message, callback) => {
-  
-}
-
-const saveLog = (newLog, location = chatlog) => {
-  
-}
