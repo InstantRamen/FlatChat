@@ -7,9 +7,8 @@ const chat = require('./chat');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const chatlog = './logs/chat.json';
 
-chat.init(chatlog);
+chat.init('./logs/chat.json');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,7 +24,7 @@ app.get('/:room?', (req, res) => {
 });
 
 
-app.post('/:room/new', (req, res) => {
+app.post('/:room?', (req, res) => {
   chat.post({
     room: req.params.room, 
     username: req.body.username,
@@ -36,8 +35,6 @@ app.post('/:room/new', (req, res) => {
     }
     
     res.send(req.body);
-    
-    
   });
 });
 

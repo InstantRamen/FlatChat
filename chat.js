@@ -1,11 +1,30 @@
 const fs = require('fs');
-const _ = require('lodash');
+// const _ = require('lodash');
 
 let chatlog = './logs/chat.json';
+let logTemplate = './base-log.json';
 
 const init = (logfile = chatlog) => {
   chatlog = logfile;
-}
+  
+  fs.exists(logfile, (exists) => {
+    if (!exists) {
+      loadTemplate((err) => {
+        if (err) {
+          return console.log('ERROR SAVING TEMPLATE: ', err);
+        }
+      });
+    }
+  });
+};
+
+const loadTemplate = (callback) => {
+  fs.readFile(logTemplate, (err, data) => {
+    if(err) return callback(err);
+    
+    save(JSON.parse(data), callback);
+  });
+};
 
 const load = (callback) => {
   fs.readFile(chatlog, (err, data) => {
@@ -22,6 +41,9 @@ const post = (message = {room: "main", username: "anon", message: "no message"},
       return callback(err);
     }
     let room = message.room || data.root;
+    if (!data.rooms[room]) {
+      data.rooms[room] = {log: []};
+    }
     data.rooms[room].log.push({"message": message.message, username: message.username});
     save(data, callback);
   });
